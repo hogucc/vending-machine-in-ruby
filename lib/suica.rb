@@ -1,23 +1,24 @@
 # frozen_string_literal: true
 
 class Suica
-  attr_reader :charge, :user_age, :user_sex, :bought_time
+  MINIMUM_CHARGE_MONEY = 100
+  attr_reader :charged_money_amount, :user_age, :user_sex, :bought_time
   def initialize(charge: 0, age: 0, sex: "男性")
-    @charge = charge
+    @charged_money_amount = charge
     @user_age = age
     @user_sex = sex
     @bought_time =  Time.now
   end
 
-  def plus_charge(price)
-    if price >= 100
-      @charge += price
+  def charge(money)
+    if money >= MINIMUM_CHARGE_MONEY
+      @charged_money_amount += money
     else
-      puts "100円未満はチャージできません"
+      raise "#{MINIMUM_CHARED_MONEY}円以上チャージしてください"
     end
   end
 
-  def minus_charge(price)
-    @charge -= price
+  def pay(money)
+    @charged_money_amount -= money
   end
 end
