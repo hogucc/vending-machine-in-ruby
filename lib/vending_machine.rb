@@ -7,13 +7,9 @@ class VendingMachine
 
   def initialize
     @stocks = {}
-    5.times do
-      drink = Drink.coke
-      unless @stocks[drink.name]
-        @stocks[drink.name] = []
-      end
-      @stocks[drink.name] << drink
-    end
+    add_stocks(Drink.coke)
+    add_stocks(Drink.redbull)
+    add_stocks(Drink.water)
     @sales_amount = 0
     @sales_histories = []
   end
@@ -48,6 +44,15 @@ class VendingMachine
   end
 
   private
+    def add_stocks(drink)
+      5.times do
+        unless @stocks[drink.name]
+          @stocks[drink.name] = []
+        end
+        @stocks[drink.name] << drink
+      end
+    end
+
     def update_sales_history(drink_name, suica)
       @sales_histories << { drink_name: drink_name, bought_time: suica.bought_time, user_age: suica.user_age, user_sex: suica.user_sex }
     end
