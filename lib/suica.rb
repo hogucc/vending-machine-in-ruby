@@ -7,7 +7,6 @@ class Suica
     @charged_money_amount = charge
     @user_age = age
     @user_sex = sex
-    @bought_time =  Time.now
   end
 
   def charge(money)

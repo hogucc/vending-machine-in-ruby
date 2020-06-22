@@ -3,7 +3,7 @@
 require "./lib/drink"
 
 class VendingMachine
-  attr_reader :sales_amount
+  attr_reader :sales_amount, :sales_histories
 
   def initialize
     @stocks = {}
@@ -26,7 +26,7 @@ class VendingMachine
     return nil unless stock_available?(name)
     price = @stocks[name].first.price
     return nil if suica.charged_money_amount < price
-    update_sales_history(@stocks[name].first.name, suica)
+    save_sales_history(@stocks[name].first.name, suica)
     drink = @stocks[name].shift
     plus_sales(price)
     suica.pay(price)
@@ -37,10 +37,8 @@ class VendingMachine
     @stocks[name].size > 0
   end
 
-  def sales_history
-    @sales_histories.each do |history|
-      puts "#{history[:bought_time]}に#{history[:drink_name]}が購入されました。買った人：#{history[:user_age]}歳 #{history[:user_sex]}"
-    end
+  def save_sales_history(drink_name, suica)
+    @sales_histories << { drink_name: drink_name, sold_time: Time.now, user_age: suica.user_age, user_sex: suica.user_sex }
   end
 
   private
@@ -51,10 +49,6 @@ class VendingMachine
         end
         @stocks[drink.name] << drink
       end
-    end
-
-    def update_sales_history(drink_name, suica)
-      @sales_histories << { drink_name: drink_name, bought_time: suica.bought_time, user_age: suica.user_age, user_sex: suica.user_sex }
     end
 
     def plus_sales(price)

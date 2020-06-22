@@ -103,4 +103,16 @@ class VendingMachineTest < Minitest::Test
     assert_equal 100, @machine.sales_amount
     assert_equal 0, suica.charged_money_amount
   end
+
+  def test_step_5_get_sales_histories
+    suica = Suica.new(charge: 120, age: 10, sex: "男性")
+    @machine.buy_drink("coke", suica)
+    sales_histories = @machine.sales_histories
+    now = Time.now
+    sales_histories.first[:sold_time] = now
+    expected = [
+      { drink_name: "coke", sold_time: now, user_age: suica.user_age, user_sex: suica.user_sex }
+    ]
+    assert_equal expected, sales_histories
+  end
 end
