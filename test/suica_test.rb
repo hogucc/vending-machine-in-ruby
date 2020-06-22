@@ -11,9 +11,7 @@ class SuicaTest < Minitest::Test
   end
 
   def test_step_0_failed_charge
-    assert_raises(StandardError) do
-      @suica.charge(99)
-    end
+    assert_nil @suica.charge(99)
   end
 
   def test_step_0_get_charged_money_amount

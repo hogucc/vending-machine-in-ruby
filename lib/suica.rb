@@ -11,11 +11,8 @@ class Suica
   end
 
   def charge(money)
-    if money >= MINIMUM_CHARGE_MONEY
-      @charged_money_amount += money
-    else
-      raise "#{MINIMUM_CHARED_MONEY}円以上チャージしてください"
-    end
+    return nil if money < MINIMUM_CHARGE_MONEY
+    @charged_money_amount += money
   end
 
   def pay(money)
