@@ -17,4 +17,12 @@ class SuicaTest < Minitest::Test
   def test_step_0_get_charged_money_amount
     assert_equal 1000, @suica.charged_money_amount
   end
+
+  def test_step4_get_user_age
+    assert_equal 10, @suica.user_age
+  end
+
+  def test_step4_get_user_sex
+    assert_equal "男性", @suica.user_sex
+  end
 end
