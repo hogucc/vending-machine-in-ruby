@@ -1,21 +1,44 @@
 # frozen_string_literal: true
 
+require "./lib/drink"
+
 class VendingMachine
+  attr_reader :sales_amount
+
   def initialize
-    @drink = Drink.new
-    @sales = 0
+    @stocks = {}
+    5.times do
+      drink = Drink.coke
+      unless @stocks[drink.name]
+        @stocks[drink.name] = []
+      end
+      @stocks[drink.name] << drink
+    end
+    @sales_amount = 0
     @sales_histories = []
   end
 
-  def buy_drink(drink_type, suica)
-    if can_buy_drink?(drink_type, suica)
-      price = @drink.price(drink_type)
-      @drink.minus_stock(drink_type)
-      plus_sales(price)
-      suica.minus_charge(price)
-      update_sales_history(@drink.name(drink_type), suica)
-      puts "売り上げ金額:#{@sales}、飲み物の在庫：#{@drink.stock(drink_type)}、suicaの残高は#{suica.charge}円です。"
-    end
+  def current_stocks
+    @stocks.map do |name, drinks|
+      drink = drinks.first
+      next if drink.nil?
+      { name: drink.name, price: drink.price, stock: drinks.count}
+    end.compact
+  end
+
+  def buy_drink(name, suica)
+    return nil unless stock_available?(name)
+    price = @stocks[name].first.price
+    return nil if suica.charged_money_amount < price
+    update_sales_history(@stocks[name].first.name, suica)
+    drink = @stocks[name].shift
+    plus_sales(price)
+    suica.pay(price)
+    drink
+  end
+
+  def stock_available?(name)
+    @stocks[name].size > 0
   end
 
   def sales_history
@@ -29,19 +52,7 @@ class VendingMachine
       @sales_histories << { drink_name: drink_name, bought_time: suica.bought_time, user_age: suica.user_age, user_sex: suica.user_sex }
     end
 
-    def can_buy_drink?(drink_type, suica)
-      if suica.charge < @drink.price(drink_type)
-        puts "残高が足りません"
-        false
-      elsif @drink.stock(drink_type) == 0
-        puts "品切れ中です"
-        false
-      else
-        true
-      end
-    end
-
     def plus_sales(price)
-      @sales += price
+      @sales_amount += price
     end
 end

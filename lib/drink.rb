@@ -1,26 +1,21 @@
 # frozen_string_literal: true
 
 class Drink
-  def initialize
-    @drink = { coke: { name: "コーラ", price: 120, stock: 5 },
-               redbull: { name: "レッドブル", price: 200, stock: 5 },
-               water: { name: "水", price: 100, stock: 5 }
-             }
+  attr_accessor :name, :price
+  def initialize(name, price)
+    @name = name
+    @price = price
   end
 
-  def name(target)
-    @drink[target][:name]
+  def self.coke
+    self.new("coke", 120)
   end
 
-  def price(target)
-    @drink[target][:price]
+  def self.redbull
+    self.new("redbull", 200)
   end
 
-  def stock(target)
-    @drink[target][:stock]
-  end
-
-  def minus_stock(target)
-    @drink[target][:stock] -= 1
+  def self.water
+    self.new("water", 100)
   end
 end
