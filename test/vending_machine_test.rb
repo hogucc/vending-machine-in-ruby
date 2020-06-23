@@ -1,12 +1,13 @@
 require 'minitest/autorun'
 require './lib/vending_machine'
 require './lib/suica'
+require 'timecop'
 
 class VendingMachineTest < Minitest::Test
   def setup
     @machine = VendingMachine.new
   end
-  
+
   def test_step_1_get_current_stocks
     expected = [
       { name: "coke", price: 120, stock: 5 },
@@ -17,7 +18,7 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_2_can_buy_coke
-    suica = Suica.new(charge: 120, age: 10, sex: "男性")
+    suica = Suica.new(charge: 120, age: 10, sex: :male)
     drink = @machine.buy_drink("coke", suica)
     assert_equal "coke", drink.name
     expected = [
@@ -31,7 +32,7 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step2_cannot_buy_due_to_charged_money_not_enough
-    suica = Suica.new(charge: 119, age: 10, sex: "男性")
+    suica = Suica.new(charge: 119, age: 10, sex: :male)
     assert_nil @machine.buy_drink("coke", suica)
 
     expected = [
@@ -47,11 +48,11 @@ class VendingMachineTest < Minitest::Test
 
   def test_step2_cannot_buy_due_to_stock_not_available
     assert @machine.stock_available?("coke")
-    suica = Suica.new(charge: 10000, age: 10, sex: "男性")
-    @machine.buy_drink("coke", suica)
-    @machine.buy_drink("coke", suica)
-    @machine.buy_drink("coke", suica)
-    @machine.buy_drink("coke", suica)
+    suica = Suica.new(charge: 10000, age: 10, sex: :male)
+    4.times do
+      @machine.buy_drink("coke", suica)
+    end
+
     assert @machine.stock_available?("coke")
     @machine.buy_drink("coke", suica)
     refute @machine.stock_available?("coke")
@@ -65,7 +66,7 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_3_get_avaliable_drink_list_after_bought_5_coke
-    suica = Suica.new(charge: 10000, age: 10, sex: "男性")
+    suica = Suica.new(charge: 10000, age: 10, sex: :male)
     5.times do
       @machine.buy_drink("coke", suica)
     end
@@ -77,7 +78,7 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_3_can_buy_redbull
-    suica = Suica.new(charge: 200, age: 10, sex: "男性")
+    suica = Suica.new(charge: 200, age: 10, sex: :male)
     drink = @machine.buy_drink("redbull", suica)
     assert_equal "redbull", drink.name
     expected = [
@@ -91,7 +92,7 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_3_can_buy_water
-    suica = Suica.new(charge: 100, age: 10, sex: "男性")
+    suica = Suica.new(charge: 100, age: 10, sex: :male)
     drink = @machine.buy_drink("water", suica)
     assert_equal "water", drink.name
     expected = [
@@ -105,14 +106,32 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_5_get_sales_histories
-    suica = Suica.new(charge: 120, age: 10, sex: "男性")
-    @machine.buy_drink("coke", suica)
-    sales_histories = @machine.sales_histories
-    now = Time.now
-    sales_histories.first[:sold_time] = now
-    expected = [
-      { drink_name: "coke", sold_time: now, user_age: suica.user_age, user_sex: suica.user_sex }
-    ]
-    assert_equal expected, sales_histories
+    Timecop.freeze(Date.today + 30) do
+      suica = Suica.new(charge: 120, age: 10, sex: :male)
+      @machine.buy_drink("coke", suica)
+      sales_histories = @machine.sales_histories
+      expected = [
+        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male }
+      ]
+      assert_equal expected, sales_histories
+
+      suica = Suica.new(charge: 1000, age: 25, sex: :female)
+      @machine.buy_drink("water", suica)
+      sales_histories = @machine.sales_histories
+      expected = [
+        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male },
+        { drink_name: "water", sold_time: Time.now, user_age: 25, user_sex: :female }
+      ]
+      assert_equal expected, sales_histories
+
+      suica = Suica.new(charge: 0, age: 5, sex: :male)
+      @machine.buy_drink("redbull", suica)
+      sales_histories = @machine.sales_histories
+      expected = [
+        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male },
+        { drink_name: "water", sold_time: Time.now, user_age: 25, user_sex: :female }
+      ]
+      assert_equal expected, sales_histories
+    end
   end
 end
