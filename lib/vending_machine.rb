@@ -15,20 +15,20 @@ class VendingMachine
   end
 
   def current_stocks
-    @stocks.map do |name, drinks|
+    @stocks.values.map do |drinks|
       drink = drinks.first
       next if drink.nil?
-      { name: drink.name, price: drink.price, stock: drinks.count}
+      { name: drink.name, price: drink.price, stock: drinks.count }
     end.compact
   end
 
   def buy_drink(name, suica)
     return nil unless stock_available?(name)
     price = @stocks[name].first.price
-    return nil if suica.charged_money_amount < price
+    return nil unless suica.payable?(price)
     save_sales_history(@stocks[name].first.name, suica)
     drink = @stocks[name].shift
-    plus_sales(price)
+    @sales_amount += price
     suica.pay(price)
     drink
   end
@@ -38,20 +38,22 @@ class VendingMachine
   end
 
   def save_sales_history(drink_name, suica)
-    @sales_histories << { drink_name: drink_name, sold_time: Time.now, user_age: suica.user_age, user_sex: suica.user_sex }
+    data = {
+      drink_name: drink_name,
+      sold_time: Time.now,
+      user_age: suica.user_age,
+      user_sex: suica.user_sex
+    }
+    @sales_histories << data
   end
 
   private
-    def add_stocks(drink)
-      5.times do
+    def add_stocks(drink, count: 5)
+      count.times do
         unless @stocks[drink.name]
           @stocks[drink.name] = []
         end
         @stocks[drink.name] << drink
       end
-    end
-
-    def plus_sales(price)
-      @sales_amount += price
     end
 end
