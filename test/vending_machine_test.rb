@@ -1,7 +1,9 @@
-require 'minitest/autorun'
-require './lib/vending_machine'
-require './lib/suica'
-require 'timecop'
+# frozen_string_literal: true
+
+require "minitest/autorun"
+require "./lib/vending_machine"
+require "./lib/suica"
+require "timecop"
 
 class VendingMachineTest < Minitest::Test
   def setup
@@ -55,7 +57,7 @@ class VendingMachineTest < Minitest::Test
 
     assert @machine.stock_available?("coke")
     @machine.buy_drink("coke", suica)
-    refute @machine.stock_available?("coke")
+    assert_equal @machine.stock_available?("coke"), false
     assert_nil @machine.buy_drink("coke", suica)
     assert_equal 600, @machine.sales_amount
     assert_equal 9400, suica.charged_money_amount
