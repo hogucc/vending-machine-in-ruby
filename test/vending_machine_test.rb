@@ -108,30 +108,37 @@ class VendingMachineTest < Minitest::Test
   end
 
   def test_step_5_get_sales_histories
-    Timecop.freeze(Date.today + 30) do
+    time_1 = Time.now
+    Timecop.freeze(time_1) do
       suica = Suica.new(charge: 120, age: 10, sex: :male)
       @machine.buy_drink("coke", suica)
       sales_histories = @machine.sales_histories
       expected = [
-        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male }
+        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male }
       ]
       assert_equal expected, sales_histories
+    end
 
+    time_2 = time_1 + 60
+    Timecop.freeze(time_2) do
       suica = Suica.new(charge: 1000, age: 25, sex: :female)
       @machine.buy_drink("water", suica)
       sales_histories = @machine.sales_histories
       expected = [
-        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male },
-        { drink_name: "water", sold_time: Time.now, user_age: 25, user_sex: :female }
+        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
+        { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
       ]
       assert_equal expected, sales_histories
+    end
 
+    time_3 = time_2 + 60
+    Timecop.freeze(time_3) do
       suica = Suica.new(charge: 0, age: 5, sex: :male)
       @machine.buy_drink("redbull", suica)
       sales_histories = @machine.sales_histories
       expected = [
-        { drink_name: "coke", sold_time: Time.now, user_age: 10, user_sex: :male },
-        { drink_name: "water", sold_time: Time.now, user_age: 25, user_sex: :female }
+        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
+        { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
       ]
       assert_equal expected, sales_histories
     end

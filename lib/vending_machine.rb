@@ -40,7 +40,7 @@ class VendingMachine
   def save_sales_history(drink_name, suica)
     data = {
       drink_name: drink_name,
-      sold_time: Time.now,
+      sold_at: Time.now,
       user_age: suica.user_age,
       user_sex: suica.user_sex
     }
