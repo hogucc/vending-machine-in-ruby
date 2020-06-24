@@ -57,7 +57,7 @@ class VendingMachineTest < Minitest::Test
 
     assert @machine.stock_available?("coke")
     @machine.buy_drink("coke", suica)
-    assert_equal @machine.stock_available?("coke"), false
+    refute @machine.stock_available?("coke")
     assert_nil @machine.buy_drink("coke", suica)
     assert_equal 600, @machine.sales_amount
     assert_equal 9400, suica.charged_money_amount
