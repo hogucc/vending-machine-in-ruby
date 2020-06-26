@@ -109,38 +109,35 @@ class VendingMachineTest < Minitest::Test
 
   def test_step_5_get_sales_histories
     time_1 = Time.now
+    suica = Suica.new(charge: 120, age: 10, sex: :male)
     Timecop.freeze(time_1) do
-      suica = Suica.new(charge: 120, age: 10, sex: :male)
       @machine.buy_drink("coke", suica)
-      sales_histories = @machine.sales_histories
-      expected = [
-        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male }
-      ]
-      assert_equal expected, sales_histories
     end
+    sales_histories = @machine.sales_histories
+    expected = [
+      { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male }
+    ]
+    assert_equal expected, sales_histories
 
     time_2 = time_1 + 60
+    suica = Suica.new(charge: 1000, age: 25, sex: :female)
     Timecop.freeze(time_2) do
-      suica = Suica.new(charge: 1000, age: 25, sex: :female)
       @machine.buy_drink("water", suica)
-      sales_histories = @machine.sales_histories
-      expected = [
-        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
-        { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
-      ]
-      assert_equal expected, sales_histories
     end
+    sales_histories = @machine.sales_histories
+    expected = [
+      { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
+      { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
+    ]
+    assert_equal expected, sales_histories
 
-    time_3 = time_2 + 60
-    Timecop.freeze(time_3) do
-      suica = Suica.new(charge: 0, age: 5, sex: :male)
-      @machine.buy_drink("redbull", suica)
-      sales_histories = @machine.sales_histories
-      expected = [
-        { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
-        { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
-      ]
-      assert_equal expected, sales_histories
-    end
+    suica = Suica.new(charge: 0, age: 5, sex: :male)
+    @machine.buy_drink("redbull", suica)
+    sales_histories = @machine.sales_histories
+    expected = [
+      { drink_name: "coke", sold_at: time_1, user_age: 10, user_sex: :male },
+      { drink_name: "water", sold_at: time_2, user_age: 25, user_sex: :female }
+    ]
+    assert_equal expected, sales_histories
   end
 end
