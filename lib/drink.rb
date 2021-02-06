@@ -8,15 +8,13 @@ class Drink
     @price = price
   end
 
-  def self.coke
-    self.new("coke", 120)
+  def self.define_drink(name, price)
+    define_singleton_method(name) do
+      new(name, price)
+    end
   end
 
-  def self.redbull
-    self.new("redbull", 200)
-  end
-
-  def self.water
-    self.new("water", 100)
-  end
+  define_drink("coke", 120)
+  define_drink("redbull", 200)
+  define_drink("water", 100)
 end
